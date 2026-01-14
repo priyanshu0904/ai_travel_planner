@@ -1,4 +1,4 @@
-# ✈️ AI Student Travel Planner
+# TripTuner : AI Student Travel Planner
 
 An AI-powered travel planning app built using Streamlit and HuggingFace.
 
