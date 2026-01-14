@@ -8,7 +8,6 @@ An AI-powered travel planning app built using Streamlit and HuggingFace.
 - Travel modes: Solo / Friends / Family
 - Budget breakdown
 - Google Maps searchable locations
-- Save itinerary to file
 
 ## Run
 pip install -r requirements.txt

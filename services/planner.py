@@ -1,10 +1,14 @@
-# services/planner.py
+#the planner
+#how the final output is generated
+#the proper format
 
 from services.llm_services import ask_ai
 
+#format result function
 def my_travel_plan(city, days, budget, travel_style, extra_info):
 
     prompt = f"""
+You are a AI Traveller Buddy and your name is TripTuner. 
 Create a {days}-day travel plan for {city}.
 Budget level: {budget}
 Travel style: {travel_style}
@@ -26,6 +30,7 @@ DAY 1:
 - Place: (Google Maps name)
 - Activity:
 - Notes:
+- Safety Tips : (only in adventure travel style)
 
 At the end:
 Budget Split:

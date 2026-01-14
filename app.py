@@ -1,116 +1,133 @@
+#importing all the important functions from other files
 import streamlit as st
 from services.planner import my_travel_plan
 from assets.image_services import get_image
 
-# ------------------ Page Setup ------------------
-st.set_page_config(page_title="AI Travel Planner", layout="wide")
+# Page Setup
+st.set_page_config(page_title="🧳TripTuner", layout="wide")
 
-st.title("✈️ AI Student Travel Planner")
+st.title("🧳TripTuner : Travel Planner Agent")
 st.markdown("Plan smart. Travel cheap. Explore beautifully.")
 
-# ------------------ Sidebar Inputs ------------------
-st.sidebar.header("🧭 Trip Preferences")
+#session state
+if "plan" not in st.session_state:
+    st.session_state.plan = ""
 
-# City Input
+if "user_note" not in st.session_state:
+    st.session_state.user_note = ""
+
+#navigation filters for the trip
+st.sidebar.header("🗒️Modify Your Trip")
+
 city = st.sidebar.text_input("🌍 City")
+days = st.sidebar.slider("📅 Number of Days", 1, 10, 3)
 
-# Days
-days_option = [1, 2, 3, 4, 5, 7, 10, 15]
-days = st.sidebar.selectbox("📅 Number of Days", days_option)
+#budget
+budget_option = ["Low", "Medium", "High"]
+budget = st.sidebar.selectbox("💰 Budget", budget_option)
 
-# Budget Options
-budget_options = ["Low", "Medium", "High"]
-budget = st.sidebar.selectbox("💰 Budget", budget_options)
-
-# Travel Style Options
-travel_style_options = [
-    "Adventure",
-    "Nature",
-    "Luxury Travel",
-    "Spiritual",
-    "Culture & Heritage",
-    "Nightlife",
-    "Photography"
+#travel
+travel_option = [
+    "Adventure","Nature", "Luxury Travel", "Spiritual", "Culture & Heritage", "Nightlife", "Photography"
 ]
-travel_style = st.sidebar.selectbox("🎒 Travel Style", travel_style_options)
+travel_style = st.sidebar.selectbox(
+    "🎒 Travel Style", travel_option)
 
-# Interest Options
-interest_options = [
-    "Nature",
-    "Nightlife",
-    "Photography",
-    "Spiritual",
-    "Adventure",
-    "Culture & Heritage"
+#intrest
+intrest_option = [
+    "Scenic Views & Sunrise",
+    "Photography Spots",
+    "Local Food & Street Food",
+    "Historical Places",
+    "Shopping & Local Markets",
+    "Cafes & Chill Places",
+    "Adventure Activities",
+    "Beaches & Relaxation",
+    "Camping & Bonfire",
+    "Nightlife & Parties",
+    "Yoga / Meditation",
+    "Art, Museums & Culture",
+    "Walking Tours",
+    "Stargazing & Nature",
+    "Music & Cultural Shows"
 ]
-interests = st.sidebar.multiselect("✨ Interests", interest_options)
+interests = st.sidebar.multiselect(
+    "✨ Interests", intrest_option)
 
-# Extra User Instructions
-st.subheader("📝 Extra Instructions")
-user_note = st.text_area(
-    "Tell us anything specific you want in your trip:",
-    placeholder="E.g. I want peaceful places, sunrise points, less crowd, cheap hostels...", key="user_note"
+#travel option
+travel_mode = st.sidebar.radio(
+    "👥 Traveling As",
+    ["Solo", "With Friends", "With Family"]
 )
-def clear_result():
-    st.session_state["user_note"] = ""
-    
 
-st.button("Clear Result:", on_click=clear_result)
+# text area for user input 
+st.markdown("<h3><b>📝Let’s map your Adventure</b></h3>", unsafe_allow_html=True)
+user_note = st.text_area(
+    "",
+    placeholder="E.g. peaceful places, sunrise points, less crowd...",
+    value=st.session_state.get("user_note", "")
+)
 
-
-# Travel Mode
-travel_mode_options = ["Solo", "With Friends", "With Family"]
-travel_mode = st.sidebar.radio("👥 Traveling As", travel_mode_options)
-
-# ------------------ Generate Button ------------------
-if st.button("🚀 Generate My Travel Plan"):
+#generate button
+if st.button("Cook My TRIP🧑‍🍳"):
 
     if not city:
         st.warning("Please enter a city name.")
     else:
         plan = my_travel_plan(
-            city=city,
-            days=days,
-            budget=budget,
-            travel_style=travel_style,
-            extra_info=", ".join(interests) + f". Travel mode: {travel_mode}. User request: {user_note}"
+            city,
+            days,
+            budget,
+            travel_style,
+            ", ".join(interests) + f". Travel mode: {travel_mode}. User request: {user_note}"
         )
 
+        # If API returned error
         if "❌" in plan:
             st.error("AI service is busy right now. Please try again later.")
         else:
-            st.success("✅ Your personalized travel plan is ready!")
+            st.session_state.plan = plan
 
-           
+#after generation
+if st.session_state.plan:
 
-            # ------------------ Itinerary Display ------------------
-            st.subheader("🗓️ Your Travel Itinerary")
+    st.success("✅ Your personalized travel plan is ready!")
 
-            for line in plan.split("\n"):
-                if line.startswith("DAY"):
-                    with st.expander(line):
-                        st.write(line)
-                else:
-                    st.write(line)
+   
 
-             # ------------------ Image Section ------------------
-            st.subheader("📸 Trip Gallery")
+    # itinerary section
+    st.subheader("🗓️ Your Travel Itinerary")
 
-            selected_images = get_image(travel_style, 3)
+    for line in st.session_state.plan.split("\n"):
+        if line.startswith("DAY"):
+            with st.expander(line):
+                st.write(line)
+        else:
+            st.write(line)
+        
+    # image section
+    st.subheader("📸📷📷")
 
-            if selected_images:
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.image(selected_images[0], use_container_width=True)
-                with col2:
-                    st.image(selected_images[1], use_container_width=True)
-                with col3:
-                    st.image(selected_images[2], use_container_width=True)
-            else:
-                st.info("No images found for this travel style.")
+    selected_images = get_image(travel_style, 3)
 
+    if selected_images:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.image(selected_images[0], use_container_width=True)
+        with col2:
+             st.image(selected_images[1], use_container_width=True)
+        with col3:
+            st.image(selected_images[2], use_container_width=True)
+    else:
+        st.info("No images found for this travel style.")
 
-# ------------------ About Section ------------------
+    # clear button
+    if st.button("🔁Plan Next Trip"):
+        st.session_state["plan"] = ""
+        st.session_state["user_note"] = ""   # value reset
+        st.rerun()
+
+# -------------------- ABOUT SECTION --------------------
 with st.expander("ℹ️ About This Project"):
     st.write("""
     This is an AI-based Student Travel Planner.
